@@ -147,12 +147,14 @@ if [[ ! "$REPO_URL" =~ ^https://github\.com/[a-zA-Z0-9_-]+(/[a-zA-Z0-9_-]+)?$ ]]
 fi
 
 # Calculate token length for validation and debug logging
+# Initialize with default to ensure it's always set
+TOKEN_LENGTH=0
 TOKEN_LENGTH=${#RUNNER_TOKEN}
 
 # Validate token is not empty and has reasonable length (skip for PAT since it fetches new tokens)
 if [ -z "$GITHUB_PAT" ]; then
-    if [ "$TOKEN_LENGTH" -lt 20 ]; then
-        bashio::log.warning "Runner token appears to be too short (length: ${TOKEN_LENGTH})"
+    if [ "${TOKEN_LENGTH:-0}" -lt 20 ]; then
+        bashio::log.warning "Runner token appears to be too short (length: ${TOKEN_LENGTH:-0})"
         bashio::log.warning "Please ensure you're using a valid registration token from GitHub"
     fi
     
@@ -171,7 +173,7 @@ if [ "$DEBUG_LOGGING" = "true" ]; then
     ls -la /runner
     bashio::log.info "Runner version:"
     cat /runner/.runner 2>/dev/null || echo "Runner not yet configured"
-    bashio::log.info "Token length: ${TOKEN_LENGTH} characters"
+    bashio::log.info "Token length: ${TOKEN_LENGTH:-unknown} characters"
     bashio::log.info "Persistent config directory contents:"
     ls -la /data/runner-config/ 2>/dev/null || echo "No persistent config yet"
     bashio::log.info "========================="
