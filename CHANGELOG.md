@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.6.1] - 2025-10-29
+- Fixed unbound variable error when using github_pat with debug_logging enabled
+
 ## [1.6.0] - 2025-10-29
 - Added Personal Access Token (PAT) support as an alternative to registration tokens
 - PAT automatically fetches fresh registration tokens, eliminating 1-hour expiration issues
