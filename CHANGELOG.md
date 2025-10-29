@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.5.3] - 2025-10-29
+- Added addon_configs folder mapping for persistent configuration storage
+
 ## [1.5.2] - 2025-10-24
 - Added Node.js and npm to support GitHub Actions composite actions (fixes setup-terraform and similar actions)
 
