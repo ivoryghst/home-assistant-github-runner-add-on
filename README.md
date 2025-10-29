@@ -20,10 +20,25 @@ Run a self-hosted GitHub Actions runner directly within your Home Assistant inst
 - Repository: `https://github.com/username/repo`
 - Organization: `https://github.com/organization`
 
-**`runner_token`** - Registration token from GitHub
+**Authentication** (one of the following is required):
+
+**`runner_token`** - Registration token from GitHub (traditional method)
 - Get it from: Repository/Organization → Settings → Actions → Runners → New self-hosted runner
 - Valid for 1 hour after generation
 - Only needed for initial setup (configuration persists across restarts)
+- **Limitation**: Must be regenerated every hour if runner needs to re-register
+
+**`github_pat`** - Personal Access Token (recommended for persistent setups)
+- Get it from: GitHub → Settings → Developer Settings → Personal Access Tokens
+- **For Fine-grained tokens (recommended)**:
+  - Select specific repository or organization
+  - Grant "Actions" permission with "Read and write" access
+  - Note: Fine-grained tokens for organizations are currently in beta
+- **For Classic tokens**:
+  - Required scopes for repository runners: `repo` (Full control of private repositories)
+  - Required scopes for organization runners: `admin:org` (Full control of orgs and teams)
+- **Advantage**: Never expires (unless you set an expiration), automatically fetches fresh registration tokens
+- **Use case**: Ideal for long-running setups where automatic re-registration is needed
 
 ### Optional Options
 
@@ -37,9 +52,19 @@ Run a self-hosted GitHub Actions runner directly within your Home Assistant inst
 
 ### Example Configuration
 
+**Using Registration Token (traditional method):**
 ```yaml
 repo_url: "https://github.com/username/repo"
 runner_token: "YOUR_RUNNER_TOKEN_HERE"
+runner_name: "my-home-assistant-runner"
+runner_labels: "self-hosted,Linux,X64,production"
+debug_logging: false
+```
+
+**Using Personal Access Token (recommended):**
+```yaml
+repo_url: "https://github.com/username/repo"
+github_pat: "YOUR_PERSONAL_ACCESS_TOKEN_HERE"
 runner_name: "my-home-assistant-runner"
 runner_labels: "self-hosted,Linux,X64,production"
 debug_logging: false
@@ -56,10 +81,13 @@ debug_logging: false
 ## Troubleshooting
 
 **404 Error During Registration**
-- Most common: Token expired (valid for 1 hour) → Generate a new token
+- Most common: Token expired (registration tokens valid for 1 hour) → **Solution**: Use a Personal Access Token (PAT) instead for automatic token renewal, or generate a new registration token
 - Check URL format: `https://github.com/owner/repo` (no trailing slash)
 - Verify you have admin permissions on the repository/organization
-- Don't use Personal Access Tokens (PATs); use the registration token from "New self-hosted runner" page
+- If using PAT: Ensure it has the correct scopes:
+  - Fine-grained tokens: "Actions" with "Read and write" access
+  - Classic tokens: `repo` scope for repository runners, `admin:org` for organization runners
+- Don't use workflow `${{ github.token }}`; use registration tokens or PATs
 
 ## Support
 
