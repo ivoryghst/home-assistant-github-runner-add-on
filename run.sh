@@ -36,6 +36,7 @@ trap 'graceful_shutdown' SIGTERM SIGINT SIGHUP
 CONFIG_FILE="/data/options.json"
 REPO_URL=$(jq -r '.repo_url // empty' "$CONFIG_FILE")
 RUNNER_TOKEN=$(jq -r '.runner_token // empty' "$CONFIG_FILE")
+GITHUB_PAT=$(jq -r '.github_pat // empty' "$CONFIG_FILE")
 RUNNER_NAME=$(jq -r '.runner_name // empty' "$CONFIG_FILE")
 RUNNER_LABELS=$(jq -r '.runner_labels // empty' "$CONFIG_FILE")
 DEBUG_LOGGING=$(jq -r '.debug_logging // false' "$CONFIG_FILE")
@@ -52,12 +53,88 @@ if [ -z "$REPO_URL" ]; then
     exit 1
 fi
 
-if [ -z "$RUNNER_TOKEN" ]; then
-    bashio::log.fatal "runner_token is required!"
+# Check that either runner_token or github_pat is provided
+if [ -z "$RUNNER_TOKEN" ] && [ -z "$GITHUB_PAT" ]; then
+    bashio::log.fatal "Either runner_token or github_pat is required!"
+    bashio::log.fatal "  - runner_token: Short-lived token from GitHub UI (valid for 1 hour)"
+    bashio::log.fatal "  - github_pat: Personal Access Token for automatic token renewal"
     exit 1
 fi
 
 bashio::log.info "Repository URL: ${REPO_URL}"
+
+# Function to fetch registration token using PAT
+fetch_registration_token() {
+    local pat="$1"
+    local repo_url="$2"
+    local api_url=""
+    
+    # Determine if this is an org or repo registration
+    if [[ "$repo_url" =~ ^https://github\.com/([^/]+)/([^/]+)$ ]]; then
+        # Repository registration
+        local owner="${BASH_REMATCH[1]}"
+        local repo="${BASH_REMATCH[2]}"
+        api_url="https://api.github.com/repos/${owner}/${repo}/actions/runners/registration-token"
+        bashio::log.info "Fetching registration token for repository: ${owner}/${repo}"
+    elif [[ "$repo_url" =~ ^https://github\.com/([^/]+)$ ]]; then
+        # Organization registration
+        local org="${BASH_REMATCH[1]}"
+        api_url="https://api.github.com/orgs/${org}/actions/runners/registration-token"
+        bashio::log.info "Fetching registration token for organization: ${org}"
+    else
+        bashio::log.error "Invalid repository URL format"
+        return 1
+    fi
+    
+    # Fetch the registration token
+    local response
+    response=$(curl -s -X POST \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: token ${pat}" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
+        "${api_url}" 2>&1)
+    
+    local exit_code=$?
+    if [ $exit_code -ne 0 ]; then
+        bashio::log.error "Failed to fetch registration token: curl error ${exit_code}"
+        return 1
+    fi
+    
+    # Extract token from response
+    local token
+    token=$(echo "$response" | jq -r '.token // empty' 2>/dev/null)
+    
+    if [ -z "$token" ]; then
+        bashio::log.error "Failed to fetch registration token from GitHub API"
+        bashio::log.error "Response: ${response}"
+        bashio::log.error ""
+        bashio::log.error "Common causes:"
+        bashio::log.error "  1. PAT doesn't have required permissions (needs 'repo' or 'admin:org' scope)"
+        bashio::log.error "  2. PAT is expired or invalid"
+        bashio::log.error "  3. Repository/Organization URL is incorrect"
+        bashio::log.error "  4. Network connectivity issues"
+        return 1
+    fi
+    
+    echo "$token"
+    return 0
+}
+
+# If PAT is provided, use it to fetch a fresh registration token
+if [ -n "$GITHUB_PAT" ]; then
+    bashio::log.info "Using Personal Access Token to fetch registration token..."
+    
+    RUNNER_TOKEN=$(fetch_registration_token "$GITHUB_PAT" "$REPO_URL")
+    
+    if [ -z "$RUNNER_TOKEN" ]; then
+        bashio::log.fatal "Failed to fetch registration token using PAT"
+        exit 1
+    fi
+    
+    bashio::log.info "Successfully fetched fresh registration token using PAT"
+else
+    bashio::log.info "Using provided registration token"
+fi
 
 # Validate repository URL format
 if [[ ! "$REPO_URL" =~ ^https://github\.com/[a-zA-Z0-9_-]+(/[a-zA-Z0-9_-]+)?$ ]]; then

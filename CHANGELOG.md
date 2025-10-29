@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0] - 2025-10-29
+- Added Personal Access Token (PAT) support as an alternative to registration tokens
+- PAT automatically fetches fresh registration tokens, eliminating 1-hour expiration issues
+- Made runner_token optional when github_pat is provided
+- Improved error messages for authentication failures
+- Fixed "doesn't run on pi" issue caused by expired registration tokens
+
 ## [1.5.3] - 2025-10-29
 - Added addon_configs folder mapping for persistent configuration storage
 
