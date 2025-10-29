@@ -1,5 +1,5 @@
 name: GitHub Actions Runner
-version: "1.6.2"
+version: "1.6.3"
 slug: github_actions_runner
 description: Self-hosted GitHub Actions runner for Home Assistant
 url: https://github.com/skille/home-assistant-github-runner-add-on
@@ -17,7 +17,7 @@ hassio_role: default
 panel_icon: mdi:github
 map:
   - timezone:ro
-  - addon_configs:rw
+  - share:rw
 options:
   repo_url: ""
   runner_token: ""
