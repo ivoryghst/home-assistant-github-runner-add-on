@@ -29,10 +29,14 @@ Run a self-hosted GitHub Actions runner directly within your Home Assistant inst
 - **Limitation**: Must be regenerated every hour if runner needs to re-register
 
 **`github_pat`** - Personal Access Token (recommended for persistent setups)
-- Get it from: GitHub → Settings → Developer Settings → Personal Access Tokens → Fine-grained tokens
-- Required scopes:
-  - For repository runners: `administration:write` permission for the repository
-  - For organization runners: `organization_self_hosted_runners:write` permission
+- Get it from: GitHub → Settings → Developer Settings → Personal Access Tokens
+- **For Fine-grained tokens (recommended)**:
+  - Select specific repository or organization
+  - Grant "Actions" permission with "Read and write" access
+  - Note: Fine-grained tokens for organizations are currently in beta
+- **For Classic tokens**:
+  - Required scopes for repository runners: `repo` (Full control of private repositories)
+  - Required scopes for organization runners: `admin:org` (Full control of orgs and teams)
 - **Advantage**: Never expires (unless you set an expiration), automatically fetches fresh registration tokens
 - **Use case**: Ideal for long-running setups where automatic re-registration is needed
 
@@ -80,7 +84,9 @@ debug_logging: false
 - Most common: Token expired (registration tokens valid for 1 hour) → **Solution**: Use a Personal Access Token (PAT) instead for automatic token renewal, or generate a new registration token
 - Check URL format: `https://github.com/owner/repo` (no trailing slash)
 - Verify you have admin permissions on the repository/organization
-- If using PAT: Ensure it has the correct scopes (`administration:write` for repos, `organization_self_hosted_runners:write` for orgs)
+- If using PAT: Ensure it has the correct scopes:
+  - Fine-grained tokens: "Actions" with "Read and write" access
+  - Classic tokens: `repo` scope for repository runners, `admin:org` for organization runners
 - Don't use workflow `${{ github.token }}`; use registration tokens or PATs
 
 ## Support

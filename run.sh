@@ -90,7 +90,7 @@ fetch_registration_token() {
     local response
     response=$(curl -s -X POST \
         -H "Accept: application/vnd.github+json" \
-        -H "Authorization: token ${pat}" \
+        -H "Authorization: Bearer ${pat}" \
         -H "X-GitHub-Api-Version: 2022-11-28" \
         "${api_url}" 2>&1)
     
@@ -109,7 +109,9 @@ fetch_registration_token() {
         bashio::log.error "Response: ${response}"
         bashio::log.error ""
         bashio::log.error "Common causes:"
-        bashio::log.error "  1. PAT doesn't have required permissions (needs 'repo' or 'admin:org' scope)"
+        bashio::log.error "  1. PAT doesn't have required permissions:"
+        bashio::log.error "     - Fine-grained tokens: 'Actions' with 'Read and write' access"
+        bashio::log.error "     - Classic tokens: 'repo' scope for repos, 'admin:org' for orgs"
         bashio::log.error "  2. PAT is expired or invalid"
         bashio::log.error "  3. Repository/Organization URL is incorrect"
         bashio::log.error "  4. Network connectivity issues"
@@ -144,15 +146,18 @@ if [[ ! "$REPO_URL" =~ ^https://github\.com/[a-zA-Z0-9_-]+(/[a-zA-Z0-9_-]+)?$ ]]
     bashio::log.warning "Provided URL: ${REPO_URL}"
 fi
 
-# Validate token is not empty and has reasonable length
-TOKEN_LENGTH=${#RUNNER_TOKEN}
-if [ "$TOKEN_LENGTH" -lt 20 ]; then
-    bashio::log.warning "Runner token appears to be too short (length: ${TOKEN_LENGTH})"
-    bashio::log.warning "Please ensure you're using a valid registration token from GitHub"
+# Validate token is not empty and has reasonable length (skip for PAT since it fetches new tokens)
+if [ -z "$GITHUB_PAT" ]; then
+    TOKEN_LENGTH=${#RUNNER_TOKEN}
+    if [ "$TOKEN_LENGTH" -lt 20 ]; then
+        bashio::log.warning "Runner token appears to be too short (length: ${TOKEN_LENGTH})"
+        bashio::log.warning "Please ensure you're using a valid registration token from GitHub"
+    fi
+    
+    bashio::log.info "Note: Registration tokens expire after 1 hour. If you see 404 errors,"
+    bashio::log.info "generate a new token from: GitHub → Settings → Actions → Runners → New runner"
+    bashio::log.info "Or use a Personal Access Token (github_pat) for automatic token renewal"
 fi
-
-bashio::log.info "Note: Registration tokens expire after 1 hour. If you see 404 errors,"
-bashio::log.info "generate a new token from: GitHub → Settings → Actions → Runners → New runner"
 
 # Debug information
 if [ "$DEBUG_LOGGING" = "true" ]; then
