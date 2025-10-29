@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.6.2] - 2025-10-29
+- Fixed TOKEN_LENGTH unbound variable error in debug logging that prevented runner startup on Raspberry Pi
+- Made TOKEN_LENGTH usage defensive with default values to prevent script crashes
+
 ## [1.6.1] - 2025-10-29
 - Fixed unbound variable error when using github_pat with debug_logging enabled
 
