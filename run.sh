@@ -146,9 +146,11 @@ if [[ ! "$REPO_URL" =~ ^https://github\.com/[a-zA-Z0-9_-]+(/[a-zA-Z0-9_-]+)?$ ]]
     bashio::log.warning "Provided URL: ${REPO_URL}"
 fi
 
+# Calculate token length for validation and debug logging
+TOKEN_LENGTH=${#RUNNER_TOKEN}
+
 # Validate token is not empty and has reasonable length (skip for PAT since it fetches new tokens)
 if [ -z "$GITHUB_PAT" ]; then
-    TOKEN_LENGTH=${#RUNNER_TOKEN}
     if [ "$TOKEN_LENGTH" -lt 20 ]; then
         bashio::log.warning "Runner token appears to be too short (length: ${TOKEN_LENGTH})"
         bashio::log.warning "Please ensure you're using a valid registration token from GitHub"
