@@ -147,6 +147,8 @@ if [[ ! "$REPO_URL" =~ ^https://github\.com/[a-zA-Z0-9_-]+(/[a-zA-Z0-9_-]+)?$ ]]
 fi
 
 # Calculate token length for validation and debug logging
+# Initialize with default to ensure it's always set
+TOKEN_LENGTH=0
 TOKEN_LENGTH=${#RUNNER_TOKEN}
 
 # Validate token is not empty and has reasonable length (skip for PAT since it fetches new tokens)
