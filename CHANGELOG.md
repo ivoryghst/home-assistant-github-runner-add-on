@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.6.3] - 2025-10-29
+- Fixed addon_configs mapping by changing to valid `share` mapping
+- The /share directory is now properly mounted, making it accessible to GitHub Actions workflows
+
 ## [1.6.2] - 2025-10-29
 - Fixed TOKEN_LENGTH unbound variable error in debug logging that prevented runner startup on Raspberry Pi
 - Made TOKEN_LENGTH usage defensive with default values to prevent script crashes
