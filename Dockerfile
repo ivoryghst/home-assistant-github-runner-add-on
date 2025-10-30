@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-venv \
     nodejs \
     npm \
+    rsync \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user for running the GitHub Actions runner
