@@ -81,9 +81,9 @@ debug_logging: false
 
 ## Security Considerations
 
-This addon runs without AppArmor restrictions to allow GitHub Actions workflows to access the system-wide `/addon_configs` directory through the `/share/addon_configs` symlink. This is necessary for workflows that need to store persistent configuration data.
+This addon runs in privileged mode without AppArmor restrictions to allow GitHub Actions workflows to access the system-wide `/addon_configs` directory. This is necessary because Home Assistant creates a symlink from `/share/addon_configs` to `/addon_configs`, and workflows need to write persistent configuration data through this path.
 
-**Important**: GitHub Actions runners inherently execute arbitrary code from your workflows. Only use this addon with repositories you trust, and ensure your workflows come from trusted sources. The reduced container isolation aligns with the security model of self-hosted runners.
+**Important**: GitHub Actions runners inherently execute arbitrary code from your workflows. Only use this addon with repositories you trust, and ensure your workflows come from trusted sources. The privileged mode and reduced container isolation align with the expected security model of self-hosted runners.
 
 ## Troubleshooting
 
