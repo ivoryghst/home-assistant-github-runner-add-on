@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.6.8] - 2025-10-30
+- Fixed /addon_configs path mismatch - updated run.sh to use /all_addon_configs to match config.yaml mapping
+
 ## [1.6.7] - 2025-10-30
 - Fixed /addon_configs mapping by changing `addon_configs:rw` to `all_addon_configs:rw` in config.yaml
 - This resolves the "/addon_configs directory not found" warning that occurred because `addon_configs` is not a valid Home Assistant mapping option

@@ -77,11 +77,11 @@ debug_logging: false
 - ✅ Graceful shutdown handling
 - ✅ Multi-architecture support (amd64, aarch64, armhf, armv7, i386)
 - ✅ Configurable runner labels
-- ✅ Access to /share/addon_configs for workflow configuration storage
+- ✅ Access to /share/all_addon_configs for workflow configuration storage
 
 ## Security Considerations
 
-This addon runs without AppArmor restrictions to allow GitHub Actions workflows to access the system-wide `/addon_configs` directory. This is necessary because Home Assistant creates a symlink from `/share/addon_configs` to `/addon_configs`, and workflows need to write persistent configuration data through this path.
+This addon runs without AppArmor restrictions to allow GitHub Actions workflows to access the system-wide `/all_addon_configs` directory. This is necessary because Home Assistant creates a symlink from `/share/all_addon_configs` to `/all_addon_configs`, and workflows need to write persistent configuration data through this path.
 
 **Important**: GitHub Actions runners inherently execute arbitrary code from your workflows. Only use this addon with repositories you trust, and ensure your workflows come from trusted sources. The reduced container isolation aligns with the expected security model of self-hosted runners.
 
@@ -96,12 +96,12 @@ This addon runs without AppArmor restrictions to allow GitHub Actions workflows 
   - Classic tokens: `repo` scope for repository runners, `admin:org` for organization runners
 - Don't use workflow `${{ github.token }}`; use registration tokens or PATs
 
-**Permission Denied When Writing to /addon_configs**
-- The add-on automatically sets permissions on `/addon_configs` at startup (version 1.6.6+)
-- Check the add-on logs to verify `/addon_configs` mount point was found
-- The mapping `addon_configs:rw` is pre-configured in the add-on and should work automatically
+**Permission Denied When Writing to /all_addon_configs**
+- The add-on automatically sets permissions on `/all_addon_configs` at startup (version 1.6.6+)
+- Check the add-on logs to verify `/all_addon_configs` mount point was found
+- The mapping `all_addon_configs:rw` is pre-configured in the add-on and should work automatically
 - If the mount point is not found in logs, try restarting the add-on
-- The directory should be accessible at `/addon_configs` from within your workflows
+- The directory should be accessible at `/all_addon_configs` from within your workflows
 
 ## Support
 
