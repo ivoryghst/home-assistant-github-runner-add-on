@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.6.12] - 2025-10-30
+- Added documentation for using rsync with /addon_configs to avoid "Operation not permitted" errors
+- Added "Usage Examples" section to README with proper rsync flags (--no-g, --no-o)
+- Added troubleshooting entry explaining why rsync fails with default ownership preservation
+- Documented that non-root users cannot change file ownership even with 777 permissions
+
 ## [1.6.11] - 2025-10-30
 - Added rsync as a dependency to support file synchronization in workflows
 
