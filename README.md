@@ -97,10 +97,10 @@ This addon runs without AppArmor restrictions to allow GitHub Actions workflows 
 - Don't use workflow `${{ github.token }}`; use registration tokens or PATs
 
 **Permission Denied When Writing to /addon_configs**
-- The add-on automatically sets permissions on `/addon_configs` at startup
+- The add-on automatically sets permissions on `/addon_configs` at startup (version 1.6.6+)
 - Check the add-on logs to verify `/addon_configs` mount point was found
-- Ensure `addon_configs:rw` is present in the `map:` section of your Home Assistant add-on configuration (this is already configured in the default config.yaml)
-- If the mount point is not found, try restarting the add-on or reinstalling it
+- The mapping `addon_configs:rw` is pre-configured in the add-on and should work automatically
+- If the mount point is not found in logs, try restarting the add-on
 - The directory should be accessible at `/addon_configs` from within your workflows
 
 ## Support
