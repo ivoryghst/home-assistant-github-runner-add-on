@@ -15,7 +15,6 @@ boot: auto
 hassio_api: true
 hassio_role: default
 privileged: true
-apparmor: false
 panel_icon: mdi:github
 map:
   - timezone:ro
