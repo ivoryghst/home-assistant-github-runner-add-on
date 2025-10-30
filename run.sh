@@ -11,7 +11,7 @@ RUNNER_PID=""
 if [ -d "/addon_configs" ]; then
     bashio::log.info "Found /addon_configs mount point"
     # Ensure the runner user has write permissions
-    chmod 770 /addon_configs 2>/dev/null || bashio::log.warning "Could not set permissions on /addon_configs (may already be correct)"
+    chmod 777 /addon_configs 2>/dev/null || bashio::log.warning "Could not set permissions on /addon_configs (may already be correct)"
     bashio::log.info "Ensured /addon_configs is writable (permissions: $(stat -c '%a' /addon_configs 2>/dev/null || echo 'unknown'))"
 else
     bashio::log.warning "/addon_configs directory not found - this may indicate the all_addon_configs:rw mapping in config.yaml (which corresponds to the /addon_configs mount point) is not configured correctly in Home Assistant"
