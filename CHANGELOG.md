@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.6.4] - 2025-10-30
+- Fixed addon_configs symlink issue by disabling AppArmor to access system-wide /addon_configs
+- This allows the addon to access /addon_configs (system-wide) that /share/addon_configs symlinks to
+- Workflows can now successfully write to /share/addon_configs without permission errors
+- **Security Note**: The addon now runs without AppArmor restrictions. This removes some container isolation but is necessary to allow workflows to access directories through symlinks. GitHub Actions runners inherently have broad access to execute arbitrary code from workflows, so this change aligns with the expected security model.
+
 ## [1.6.3] - 2025-10-29
 - Fixed addon_configs mapping by changing to valid `share` mapping
 - The /share directory is now properly mounted, making it accessible to GitHub Actions workflows
