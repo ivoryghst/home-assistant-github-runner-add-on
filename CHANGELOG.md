@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.6.4] - 2025-10-30
+- Fixed addon_configs symlink issue by directly mapping addon_configs directory
+- This allows /share/addon_configs symlink (which points to /addon_configs) to work properly from workflows
+- Workflows can now successfully write to /share/addon_configs without permission errors
+
 ## [1.6.3] - 2025-10-29
 - Fixed addon_configs mapping by changing to valid `share` mapping
 - The /share directory is now properly mounted, making it accessible to GitHub Actions workflows
