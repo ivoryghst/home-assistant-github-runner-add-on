@@ -1,7 +1,12 @@
 # Changelog
 
+## [1.6.9] - 2025-10-30
+- Fixed /addon_configs path mismatch - Home Assistant mounts `all_addon_configs:rw` at `/addon_configs` not `/all_addon_configs`
+- Updated run.sh to check for `/addon_configs` directory
+- Updated README.md to reflect correct path documentation
+
 ## [1.6.8] - 2025-10-30
-- Fixed /addon_configs path mismatch - updated run.sh to use /all_addon_configs to match config.yaml mapping
+- Attempted to fix /addon_configs path mismatch - incorrectly updated run.sh to use /all_addon_configs (fixed in 1.6.9)
 
 ## [1.6.7] - 2025-10-30
 - Fixed /addon_configs mapping by changing `addon_configs:rw` to `all_addon_configs:rw` in config.yaml
