@@ -109,7 +109,7 @@ The `/addon_configs` directory is available for storing persistent configuration
 - `--no-o`: Skip owner preservation (avoids permission issues)
 - `-a`: Archive mode (preserves timestamps, symlinks, etc.)
 - `-v`: Verbose output
-- `--checksum`: Use checksums instead of mod-time & size for change detection
+- `--checksum`: Use checksums instead of mod-time & size for change detection (slower but more accurate)
 - `--delete`: Delete files in destination that don't exist in source
 
 ### Writing Individual Files
@@ -161,8 +161,8 @@ The `/addon_configs` directory is available for storing persistent configuration
   # Alternative: Skip all permissions (also disables chmod)
   rsync -av --no-perms --no-owner --no-group /source/ /addon_configs/target/
   
-  # Or: Use --no-p to skip permissions entirely
-  rsync -rlptv --no-p --no-g --no-o /source/ /addon_configs/target/
+  # Or: Basic copy without preserving permissions
+  rsync -rltv --no-g --no-o /source/ /addon_configs/target/
   ```
 - If you see errors like `rsync: [generator] chgrp ... failed: Operation not permitted (1)`, add the `--no-g` flag
 - You can still use `--checksum` and `--delete` flags as needed for your use case

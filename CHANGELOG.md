@@ -5,6 +5,7 @@
 - Added "Usage Examples" section to README with proper rsync flags (--no-g, --no-o)
 - Added troubleshooting entry explaining why rsync fails with default ownership preservation
 - Documented that non-root users cannot change file ownership even with 777 permissions
+- Clarified rsync flag descriptions and fixed conflicting flag combinations
 
 ## [1.6.11] - 2025-10-30
 - Added rsync as a dependency to support file synchronization in workflows
