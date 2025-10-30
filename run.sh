@@ -6,6 +6,18 @@ bashio::log.info "Starting GitHub Actions Runner..."
 # PID of the runner process
 RUNNER_PID=""
 
+# Ensure /addon_configs exists and is writable
+# This directory is mounted by Home Assistant when addon_configs:rw is in config.yaml
+if [ -d "/addon_configs" ]; then
+    bashio::log.info "Found /addon_configs mount point"
+    # Ensure the runner user has write permissions
+    chmod 777 /addon_configs 2>/dev/null || bashio::log.warning "Could not set permissions on /addon_configs (may already be correct)"
+    bashio::log.info "Ensured /addon_configs is writable (permissions: $(stat -c '%a' /addon_configs 2>/dev/null || echo 'unknown'))"
+else
+    bashio::log.warning "/addon_configs directory not found - this may indicate the addon_configs:rw mapping is not configured correctly in Home Assistant"
+    bashio::log.warning "Workflows attempting to use /addon_configs will fail"
+fi
+
 # Graceful shutdown handler
 graceful_shutdown() {
     bashio::log.info "Received shutdown signal. Initiating graceful shutdown..."
