@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.6.11] - 2025-10-30
+- Added rsync as a dependency to support file synchronization in workflows
+
 ## [1.6.10] - 2025-10-30
 - Fixed /addon_configs permissions to 777 to allow runner user (non-root) to write to the directory
 - Changed chmod from 770 to 777 in run.sh to ensure all users can access the directory
