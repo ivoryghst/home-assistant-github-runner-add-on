@@ -14,7 +14,7 @@ if [ -d "/addon_configs" ]; then
     chmod 770 /addon_configs 2>/dev/null || bashio::log.warning "Could not set permissions on /addon_configs (may already be correct)"
     bashio::log.info "Ensured /addon_configs is writable (permissions: $(stat -c '%a' /addon_configs 2>/dev/null || echo 'unknown'))"
 else
-    bashio::log.warning "/addon_configs directory not found - this may indicate the all_addon_configs:rw mapping is not configured correctly in Home Assistant"
+    bashio::log.warning "/addon_configs directory not found - this may indicate the all_addon_configs:rw mapping in config.yaml (which corresponds to the /addon_configs mount point) is not configured correctly in Home Assistant"
     bashio::log.warning "Workflows attempting to use /addon_configs will fail"
 fi
 
