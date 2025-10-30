@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.5] - 2025-10-30
+- Fixed addon_configs symlink issue by running in privileged mode and directly mapping /addon_configs
+- Added `privileged: true` to enable container to access system-wide /addon_configs directory
+- Added `addon_configs:rw` mapping to directly mount the /addon_configs directory
+- This resolves the issue where /share/addon_configs symlink pointing to /addon_configs was not writable
+- **Security Note**: The addon now runs in privileged mode with direct /addon_configs access. This is necessary because Home Assistant creates a symlink from /share/addon_configs to /addon_configs which is outside the container's mapped volumes. GitHub Actions runners inherently execute arbitrary code from workflows, so this privileged access aligns with the expected security model of self-hosted runners.
+
 ## [1.6.4] - 2025-10-30
 - Fixed addon_configs symlink issue by disabling AppArmor to access system-wide /addon_configs
 - This allows the addon to access /addon_configs (system-wide) that /share/addon_configs symlinks to
