@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.6.7] - 2025-10-30
+- Fixed /addon_configs mapping by changing `addon_configs:rw` to `all_addon_configs:rw` in config.yaml
+- This resolves the "/addon_configs directory not found" warning that occurred because `addon_configs` is not a valid Home Assistant mapping option
+
 ## [1.6.6] - 2025-10-30
 - Fixed /addon_configs permissions to ensure GitHub Actions workflows can write to the directory
 - Added automatic permission setup for /addon_configs on container startup
