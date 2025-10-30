@@ -4,7 +4,7 @@
 - Fixed addon_configs symlink issue by disabling AppArmor and directly mapping `/addon_configs`
 - Added `addon_configs:rw` mapping to directly mount the `/addon_configs` directory
 - This resolves the issue where `/share/addon_configs` symlink pointing to `/addon_configs` was not writable
-- **Security Note**: The addon runs without AppArmor restrictions with direct `/addon_configs` access. This is necessary because Home Assistant creates a symlink from `/share/addon_configs` to `/addon_configs` which is outside the container's default mapped volumes. GitHub Actions runners inherently execute arbitrary code from workflows, so this reduced isolation aligns with the expected security model of self-hosted runners.
+- **Security Note**: The addon runs without AppArmor restrictions with direct `/addon_configs` access. This is necessary because Home Assistant creates a symlink from `/share/addon_configs` to `/addon_configs` which lies outside the container's standard volume mappings. GitHub Actions runners inherently execute arbitrary code from workflows, so this reduced isolation aligns with the expected security model of self-hosted runners.
 
 ## [1.6.4] - 2025-10-30
 - Fixed addon_configs symlink issue by disabling AppArmor to access system-wide /addon_configs
