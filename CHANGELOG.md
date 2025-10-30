@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.6.6] - 2025-10-30
+- Fixed /addon_configs permissions to ensure GitHub Actions workflows can write to the directory
+- Added automatic permission setup for /addon_configs on container startup
+- Added diagnostic logging for /addon_configs mount status
+
 ## [1.6.5] - 2025-10-30
 - Fixed addon_configs symlink issue by disabling AppArmor and directly mapping `/addon_configs`
 - Added `addon_configs:rw` mapping to directly mount the `/addon_configs` directory

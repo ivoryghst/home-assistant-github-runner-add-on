@@ -96,6 +96,13 @@ This addon runs without AppArmor restrictions to allow GitHub Actions workflows 
   - Classic tokens: `repo` scope for repository runners, `admin:org` for organization runners
 - Don't use workflow `${{ github.token }}`; use registration tokens or PATs
 
+**Permission Denied When Writing to /addon_configs**
+- The add-on automatically sets permissions on `/addon_configs` at startup (version 1.6.6+)
+- Check the add-on logs to verify `/addon_configs` mount point was found
+- The mapping `addon_configs:rw` is pre-configured in the add-on and should work automatically
+- If the mount point is not found in logs, try restarting the add-on
+- The directory should be accessible at `/addon_configs` from within your workflows
+
 ## Support
 
 Got questions or issues? Please open an issue on the [GitHub repository][github].
