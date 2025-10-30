@@ -77,6 +77,13 @@ debug_logging: false
 - ✅ Graceful shutdown handling
 - ✅ Multi-architecture support (amd64, aarch64, armhf, armv7, i386)
 - ✅ Configurable runner labels
+- ✅ Access to /share/addon_configs for workflow configuration storage
+
+## Security Considerations
+
+This addon runs without AppArmor restrictions to allow GitHub Actions workflows to access the system-wide `/addon_configs` directory through the `/share/addon_configs` symlink. This is necessary for workflows that need to store persistent configuration data.
+
+**Important**: GitHub Actions runners inherently execute arbitrary code from your workflows. Only use this addon with repositories you trust, and ensure your workflows come from trusted sources. The reduced container isolation aligns with the security model of self-hosted runners.
 
 ## Troubleshooting
 
