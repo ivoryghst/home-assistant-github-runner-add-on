@@ -1,6 +1,13 @@
-# Copilot AI Guidelines for GitHub Actions Runner Add-on
+# Copilot AI Guidelines for HA GitHub Runner Add-ons
 
 Guidelines for contributors using AI tools to work on this project.
+
+## Repository Structure
+
+This is a multi-addon repository:
+- Each addon has its own directory (e.g., `ha-github-runner/`)
+- Each addon has its own `config.yaml`, `build.yaml`, `Dockerfile`, `run.sh`, etc.
+- The root `repository.yaml` describes the repository
 
 ---
 
@@ -40,10 +47,16 @@ Guidelines for contributors using AI tools to work on this project.
 
 ## Key Configuration Files
 
+Per addon (in addon directory, e.g., `ha-github-runner/`):
 - **config.yaml**: Add-on metadata, schema, options
 - **build.yaml**: Docker images for each architecture
+- **Dockerfile**: Container build instructions
 - **run.sh**: Main execution script (uses bashio for logging)
-- **README.md**: User-facing quick start
+- **README.md**: Add-on specific documentation
+
+Repository level:
+- **repository.yaml**: Repository metadata
+- **README.md**: Repository overview
 - **CHANGELOG.md**: Version history (simple bullet points)
 - **CONTRIBUTING.md**: Contribution guidelines
 
@@ -91,7 +104,9 @@ Guidelines for contributors using AI tools to work on this project.
 
 ### 🚨 CRITICAL: Version Bump Required
 
-**Every PR to main must bump version in `config.yaml`**
+**Every PR to main must bump version in the addon's `config.yaml`**
+
+For example: `ha-github-runner/config.yaml`
 
 - Enforced by automated CI checks
 - New version must be greater than main branch version
@@ -107,10 +122,10 @@ Guidelines for contributors using AI tools to work on this project.
 
 1. Check current main version:
    ```bash
-   git show origin/main:config.yaml | grep version
+   git show origin/main:ha-github-runner/config.yaml | grep version
    ```
 
-2. Update `config.yaml` with higher version
+2. Update the addon's `config.yaml` with higher version (e.g., `ha-github-runner/config.yaml`)
 
 3. Update `CHANGELOG.md` with simple bullet points:
    ```markdown
@@ -147,7 +162,7 @@ Guidelines for contributors using AI tools to work on this project.
 
 When making changes:
 
-- [ ] Version bumped in `config.yaml` (must be > main branch version)
+- [ ] Version bumped in addon's `config.yaml` (must be > main branch version)
 - [ ] `CHANGELOG.md` updated with simple bullet points
 - [ ] Documentation follows concise pattern (no verbose AI text)
 - [ ] Configuration read from `/data/options.json`

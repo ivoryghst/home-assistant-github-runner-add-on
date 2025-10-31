@@ -1,6 +1,13 @@
-# Contributing to GitHub Actions Runner Add-on
+# Contributing to HA GitHub Runner Add-ons
 
 We welcome contributions! Please follow these guidelines.
+
+## Repository Structure
+
+This is a multi-addon repository:
+- Each addon has its own directory (e.g., `ha-github-runner/`)
+- Each addon has its own `config.yaml`, `README.md`, etc.
+- The root `repository.yaml` describes the repository
 
 ## Quick Start
 
@@ -14,7 +21,9 @@ We welcome contributions! Please follow these guidelines.
 
 ## 🚨 Version Bump (Required)
 
-**Every PR to main must bump version in `config.yaml`**
+**Every PR to main must bump version in the addon's `config.yaml`**
+
+For example: `ha-github-runner/config.yaml`
 
 ### Semantic Versioning
 
@@ -26,10 +35,10 @@ We welcome contributions! Please follow these guidelines.
 
 1. Check current version:
    ```bash
-   git show origin/main:config.yaml | grep version
+   git show origin/main:ha-github-runner/config.yaml | grep version
    ```
 
-2. Update `config.yaml` with new version
+2. Update the addon's `config.yaml` with new version (e.g., `ha-github-runner/config.yaml`)
 
 3. Update `CHANGELOG.md`:
    ```markdown
@@ -91,7 +100,7 @@ Before submitting:
 
 ## Testing
 
-1. Build Docker image: `docker build -t test-runner .`
+1. Build Docker image: `docker build -t test-runner ha-github-runner/`
 2. Test in Home Assistant
 3. Enable `debug_logging: true` for troubleshooting
 

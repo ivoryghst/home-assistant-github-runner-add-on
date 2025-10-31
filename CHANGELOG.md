@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0] - 2025-10-31
+- **BREAKING**: Rebranded addon from `github_actions_runner` to `ha-github-runner`
+- Moved addon files to `ha-github-runner/` directory for multi-addon repository support
+- Updated repository structure to support multiple addons
+- Added documentation explaining fork rationale (addon_configs mounting and rsync support)
+- Updated all URLs to point to ivoryghst fork
+
 ## [1.6.12] - 2025-10-30
 - Added documentation for using rsync with /addon_configs to avoid "Operation not permitted" errors
 - Added "Usage Examples" section to README with proper rsync flags (--no-g, --no-o)
