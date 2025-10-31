@@ -85,6 +85,53 @@ This addon runs without AppArmor restrictions to allow GitHub Actions workflows 
 
 **Important**: GitHub Actions runners inherently execute arbitrary code from your workflows. Only use this addon with repositories you trust, and ensure your workflows come from trusted sources. The reduced container isolation aligns with the expected security model of self-hosted runners.
 
+## Usage Examples
+
+### Syncing Files to /addon_configs
+
+The `/addon_configs` directory is available for storing persistent configuration data from your workflows. Here's how to sync files correctly:
+
+```yaml
+- name: Sync files to addon_configs
+  run: |
+    # Create target directory if needed
+    mkdir -p /addon_configs/my-config
+    
+    # Sync files using rsync (recommended flags to avoid permission errors)
+    rsync -av --no-g --no-o --checksum --delete \
+      ./source-directory/ \
+      /addon_configs/my-config/
+  shell: bash
+```
+
+**Important rsync flags for /addon_configs:**
+- `--no-g`: Skip group preservation (avoids "Operation not permitted" errors)
+- `--no-o`: Skip owner preservation (avoids permission issues)
+- `-a`: Archive mode (preserves timestamps, symlinks, etc.)
+- `-v`: Verbose output
+- `--checksum`: Use checksums instead of mod-time & size for change detection (slower but more accurate)
+- `--delete`: Delete files in destination that don't exist in source
+
+### Writing Individual Files
+
+```yaml
+- name: Write configuration file
+  run: |
+    echo "my-config-data" > /addon_configs/my-app/config.yaml
+  shell: bash
+```
+
+### Reading Files from /addon_configs
+
+```yaml
+- name: Read configuration
+  run: |
+    if [ -f /addon_configs/my-app/config.yaml ]; then
+      cat /addon_configs/my-app/config.yaml
+    fi
+  shell: bash
+```
+
 ## Troubleshooting
 
 **404 Error During Registration**
@@ -102,6 +149,23 @@ This addon runs without AppArmor restrictions to allow GitHub Actions workflows 
 - The mapping `all_addon_configs:rw` is pre-configured in the add-on and should work automatically
 - If the mount point is not found in logs, try restarting the add-on
 - The directory should be accessible at `/addon_configs` from within your workflows
+
+**rsync "Operation not permitted" Errors When Syncing to /addon_configs**
+- By default, `rsync` tries to preserve file ownership (user/group), which requires root privileges
+- Non-root users (including the runner) cannot change file ownership, even with 777 permissions
+- **Solution**: Use rsync with flags that skip ownership preservation:
+  ```bash
+  # Recommended: Skip group and owner preservation
+  rsync -av --no-g --no-o /source/ /addon_configs/target/
+  
+  # Alternative: Skip all permissions (also disables chmod)
+  rsync -av --no-perms --no-owner --no-group /source/ /addon_configs/target/
+  
+  # Or: Basic copy without preserving permissions
+  rsync -rltv --no-g --no-o /source/ /addon_configs/target/
+  ```
+- If you see errors like `rsync: [generator] chgrp ... failed: Operation not permitted (1)`, add the `--no-g` flag
+- You can still use `--checksum` and `--delete` flags as needed for your use case
 
 ## Support
 
