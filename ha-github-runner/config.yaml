@@ -2,7 +2,7 @@ name: HA GitHub Runner
 version: "1.7.0"
 slug: ha-github-runner
 description: Self-hosted GitHub Actions runner for Home Assistant with addon_configs and rsync support
-url: https://github.com/ivoryghst/home-assistant-github-runner-add-on
+url: https://github.com/ivoryghst/ha-addons
 arch:
   - aarch64
   - amd64

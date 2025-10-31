@@ -25,7 +25,7 @@ Run a self-hosted GitHub Actions runner directly within your Home Assistant inst
 
 1. Add this repository to your Home Assistant add-on store:
    ```
-   https://github.com/ivoryghst/home-assistant-github-runner-add-on
+   https://github.com/ivoryghst/ha-addons
    ```
 2. Install the "HA GitHub Runner" add-on
 3. See individual add-on documentation for configuration details
@@ -46,10 +46,10 @@ MIT License
 
 Copyright (c) 2024
 
-[releases-shield]: https://img.shields.io/github/release/ivoryghst/home-assistant-github-runner-add-on.svg
-[releases]: https://github.com/ivoryghst/home-assistant-github-runner-add-on/releases
+[releases-shield]: https://img.shields.io/github/release/ivoryghst/ha-addons.svg
+[releases]: https://github.com/ivoryghst/ha-addons/releases
 [project-stage-shield]: https://img.shields.io/badge/project%20stage-production%20ready-brightgreen.svg
-[github]: https://github.com/ivoryghst/home-assistant-github-runner-add-on
+[github]: https://github.com/ivoryghst/ha-addons
 
 ---
 
