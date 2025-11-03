@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.7.1] - 2025-11-03
+- Trim leading/trailing whitespace from configured runner name and labels to avoid GitHub registration failures
+- Log the normalized values when whitespace is cleaned so misconfigurations are obvious in addon logs
+
 ## [1.7.0] - 2025-10-31
 - **BREAKING**: Rebranded addon from `github_actions_runner` to `ha-github-runner`
 - Moved addon files to `ha-github-runner/` directory for multi-addon repository support

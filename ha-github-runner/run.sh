@@ -53,6 +53,57 @@ RUNNER_NAME=$(jq -r '.runner_name // empty' "$CONFIG_FILE")
 RUNNER_LABELS=$(jq -r '.runner_labels // empty' "$CONFIG_FILE")
 DEBUG_LOGGING=$(jq -r '.debug_logging // false' "$CONFIG_FILE")
 
+# Helper functions for input normalization
+trim_whitespace() {
+    local value="$1"
+    value="${value#${value%%[![:space:]]*}}"
+    value="${value%${value##*[![:space:]]}}"
+    echo "$value"
+}
+
+sanitize_labels() {
+    local input="$1"
+    local IFS=','
+    local -a raw_labels=()
+    local -a cleaned_labels=()
+
+    # shellcheck disable=SC2206
+    read -ra raw_labels <<< "$input" || true
+
+    for label in "${raw_labels[@]}"; do
+        local trimmed
+        trimmed=$(trim_whitespace "$label")
+        if [ -n "$trimmed" ]; then
+            cleaned_labels+=("$trimmed")
+        fi
+    done
+
+    if [ ${#cleaned_labels[@]} -eq 0 ]; then
+        echo ""
+        return
+    fi
+
+    local IFS=','
+    echo "${cleaned_labels[*]}"
+}
+
+# Normalize runner name and labels to avoid GitHub API validation failures
+if [ -n "$RUNNER_NAME" ]; then
+    trimmed_runner_name=$(trim_whitespace "$RUNNER_NAME")
+    if [ "$trimmed_runner_name" != "$RUNNER_NAME" ]; then
+        bashio::log.info "Normalized runner name from '${RUNNER_NAME}' to '${trimmed_runner_name}'"
+    fi
+    RUNNER_NAME="$trimmed_runner_name"
+fi
+
+if [ -n "$RUNNER_LABELS" ]; then
+    normalized_runner_labels=$(sanitize_labels "$RUNNER_LABELS")
+    if [ -n "$normalized_runner_labels" ] && [ "$normalized_runner_labels" != "$RUNNER_LABELS" ]; then
+        bashio::log.info "Normalized runner labels from '${RUNNER_LABELS}' to '${normalized_runner_labels}'"
+    fi
+    RUNNER_LABELS="$normalized_runner_labels"
+fi
+
 # Enable debug logging if requested
 if [ "$DEBUG_LOGGING" = "true" ]; then
     bashio::log.info "Debug logging enabled"
