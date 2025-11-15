@@ -1,5 +1,46 @@
+# Version control
 .git
 .github
 .gitignore
+
+# Documentation
 README.md
 *.md
+CHANGELOG.md
+CONTRIBUTING.md
+
+# IDE and editor files
+.idea
+.vscode
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build artifacts
+*.tar.gz
+*.zip
+dist/
+build/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Node modules
+node_modules/
+npm-debug.log*
+
+# Test files
+test/
+tests/
+*.test
+*.spec
+
+# Temporary files
+*.tmp
+*.log
+.cache/

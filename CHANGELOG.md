@@ -9,7 +9,11 @@
 - Improved /addon_configs permissions handling (try 775 before falling back to 777)
 - Added connection timeout and max-time limits to curl operations
 - Better structured error messages with clear troubleshooting steps
-- Removed duplicate URL validation code
+- Removed duplicate URL validation and error handling code
+- Fixed YAML linting issues (line length violations)
+- Enhanced .dockerignore to exclude more unnecessary files
+- Consolidated duplicate documentation between root and addon READMEs
+- Added Performance Tuning section to documentation
 
 ## [1.7.1] - 2025-11-03
 - Trim leading/trailing whitespace from configured runner name and labels to avoid GitHub registration failures
