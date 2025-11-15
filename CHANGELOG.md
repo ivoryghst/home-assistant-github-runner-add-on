@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.8.0] - 2025-11-15
+- Added checksum verification for GitHub runner downloads for improved security
+- Improved error handling with retry logic and exponential backoff for API calls
+- Enhanced input validation and sanitization for all configuration parameters
+- Fixed shellcheck warnings (SC2295, SC2002) for better code quality
+- Optimized Dockerfile with pinned package versions for reproducibility
+- Improved /addon_configs permissions handling (try 775 before falling back to 777)
+- Added connection timeout and max-time limits to curl operations
+- Better structured error messages with clear troubleshooting steps
+- Removed duplicate URL validation code
+
 ## [1.7.1] - 2025-11-03
 - Trim leading/trailing whitespace from configured runner name and labels to avoid GitHub registration failures
 - Log the normalized values when whitespace is cleaned so misconfigurations are obvious in addon logs
