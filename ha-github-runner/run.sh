@@ -10,11 +10,18 @@ RUNNER_PID=""
 # This directory is mounted by Home Assistant when all_addon_configs:rw is in config.yaml
 if [ -d "/addon_configs" ]; then
     bashio::log.info "Found /addon_configs mount point"
-    # Ensure the runner user has write permissions
-    chmod 777 /addon_configs 2>/dev/null || bashio::log.warning "Could not set permissions on /addon_configs (may already be correct)"
-    bashio::log.info "Ensured /addon_configs is writable (permissions: $(stat -c '%a' /addon_configs 2>/dev/null || echo 'unknown'))"
+    # Try to set permissions to 775 (owner+group can write, others can read)
+    # If that fails, fall back to 777 (all can write)
+    if chmod 775 /addon_configs 2>/dev/null; then
+        bashio::log.info "Set /addon_configs permissions to 775 (group writable)"
+    elif chmod 777 /addon_configs 2>/dev/null; then
+        bashio::log.warning "Set /addon_configs permissions to 777 (world writable)"
+    else
+        bashio::log.warning "Could not set permissions on /addon_configs (may already be correct)"
+    fi
+    bashio::log.info "Current /addon_configs permissions: $(stat -c '%a' /addon_configs 2>/dev/null || echo 'unknown')"
 else
-    bashio::log.warning "/addon_configs directory not found - this may indicate the all_addon_configs:rw mapping in config.yaml (which corresponds to the /addon_configs mount point) is not configured correctly in Home Assistant"
+    bashio::log.warning "/addon_configs directory not found - this may indicate the all_addon_configs:rw mapping in config.yaml is not configured correctly in Home Assistant"
     bashio::log.warning "Workflows attempting to use /addon_configs will fail"
 fi
 
@@ -56,8 +63,8 @@ DEBUG_LOGGING=$(jq -r '.debug_logging // false' "$CONFIG_FILE")
 # Helper functions for input normalization
 trim_whitespace() {
     local value="$1"
-    value="${value#${value%%[![:space:]]*}}"
-    value="${value%${value##*[![:space:]]}}"
+    value="${value#"${value%%[![:space:]]*}"}"
+    value="${value%"${value##*[![:space:]]}"}"
     echo "$value"
 }
 
@@ -116,6 +123,21 @@ if [ -z "$REPO_URL" ]; then
     exit 1
 fi
 
+# Sanitize and validate REPO_URL
+REPO_URL=$(trim_whitespace "$REPO_URL")
+# Remove trailing slash if present
+REPO_URL="${REPO_URL%/}"
+
+# Validate repository URL format
+if [[ ! "$REPO_URL" =~ ^https://github\.com/[a-zA-Z0-9_-]+(/[a-zA-Z0-9_.-]+)?$ ]]; then
+    bashio::log.fatal "Invalid repository URL format!"
+    bashio::log.fatal "Expected format:"
+    bashio::log.fatal "  - For repository: https://github.com/owner/repo"
+    bashio::log.fatal "  - For organization: https://github.com/organization"
+    bashio::log.fatal "Provided URL: ${REPO_URL}"
+    exit 1
+fi
+
 # Check that either runner_token or github_pat is provided
 if [ -z "$RUNNER_TOKEN" ] && [ -z "$GITHUB_PAT" ]; then
     bashio::log.fatal "Either runner_token or github_pat is required!"
@@ -124,13 +146,32 @@ if [ -z "$RUNNER_TOKEN" ] && [ -z "$GITHUB_PAT" ]; then
     exit 1
 fi
 
+# Validate token format (basic check)
+if [ -n "$RUNNER_TOKEN" ]; then
+    RUNNER_TOKEN=$(trim_whitespace "$RUNNER_TOKEN")
+    if [ "${#RUNNER_TOKEN}" -lt 20 ]; then
+        bashio::log.warning "Runner token appears to be too short (length: ${#RUNNER_TOKEN})"
+        bashio::log.warning "Please ensure you're using a valid registration token from GitHub"
+    fi
+fi
+
+if [ -n "$GITHUB_PAT" ]; then
+    GITHUB_PAT=$(trim_whitespace "$GITHUB_PAT")
+    if [ "${#GITHUB_PAT}" -lt 20 ]; then
+        bashio::log.warning "GitHub PAT appears to be too short (length: ${#GITHUB_PAT})"
+        bashio::log.warning "Please ensure you're using a valid Personal Access Token"
+    fi
+fi
+
 bashio::log.info "Repository URL: ${REPO_URL}"
 
-# Function to fetch registration token using PAT
+# Function to fetch registration token using PAT with retry logic
 fetch_registration_token() {
     local pat="$1"
     local repo_url="$2"
     local api_url=""
+    local max_retries=3
+    local retry_delay=5
     
     # Determine if this is an org or repo registration
     if [[ "$repo_url" =~ ^https://github\.com/([^/]+)/([^/]+)$ ]]; then
@@ -149,40 +190,58 @@ fetch_registration_token() {
         return 1
     fi
     
-    # Fetch the registration token
+    # Retry loop for fetching the registration token
+    local attempt=1
     local response
-    response=$(curl -s -X POST \
-        -H "Accept: application/vnd.github+json" \
-        -H "Authorization: Bearer ${pat}" \
-        -H "X-GitHub-Api-Version: 2022-11-28" \
-        "${api_url}" 2>&1)
+    local exit_code
     
-    local exit_code=$?
-    if [ $exit_code -ne 0 ]; then
-        bashio::log.error "Failed to fetch registration token: curl error ${exit_code}"
-        return 1
-    fi
+    while [ $attempt -le $max_retries ]; do
+        if [ $attempt -gt 1 ]; then
+            bashio::log.info "Retry attempt $attempt of $max_retries after ${retry_delay}s delay..."
+            sleep $retry_delay
+            # Exponential backoff
+            retry_delay=$((retry_delay * 2))
+        fi
+        
+        # Fetch the registration token
+        response=$(curl -sSf -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${pat}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            --max-time 30 \
+            --connect-timeout 10 \
+            "${api_url}" 2>&1)
+        
+        exit_code=$?
+        
+        if [ $exit_code -eq 0 ]; then
+            # Extract token from response
+            local token
+            token=$(echo "$response" | jq -r '.token // empty' 2>/dev/null)
+            
+            if [ -n "$token" ]; then
+                bashio::log.info "Successfully fetched registration token"
+                echo "$token"
+                return 0
+            fi
+        fi
+        
+        bashio::log.warning "Failed to fetch registration token (attempt $attempt/$max_retries): curl error ${exit_code}"
+        attempt=$((attempt + 1))
+    done
     
-    # Extract token from response
-    local token
-    token=$(echo "$response" | jq -r '.token // empty' 2>/dev/null)
-    
-    if [ -z "$token" ]; then
-        bashio::log.error "Failed to fetch registration token from GitHub API"
-        bashio::log.error "Response: ${response}"
-        bashio::log.error ""
-        bashio::log.error "Common causes:"
-        bashio::log.error "  1. PAT doesn't have required permissions:"
-        bashio::log.error "     - Fine-grained tokens: 'Actions' with 'Read and write' access"
-        bashio::log.error "     - Classic tokens: 'repo' scope for repos, 'admin:org' for orgs"
-        bashio::log.error "  2. PAT is expired or invalid"
-        bashio::log.error "  3. Repository/Organization URL is incorrect"
-        bashio::log.error "  4. Network connectivity issues"
-        return 1
-    fi
-    
-    echo "$token"
-    return 0
+    # All retries failed
+    bashio::log.error "Failed to fetch registration token from GitHub API after $max_retries attempts"
+    bashio::log.error "Last response: ${response}"
+    bashio::log.error ""
+    bashio::log.error "Common causes:"
+    bashio::log.error "  1. PAT doesn't have required permissions:"
+    bashio::log.error "     - Fine-grained tokens: 'Actions' with 'Read and write' access"
+    bashio::log.error "     - Classic tokens: 'repo' scope for repos, 'admin:org' for orgs"
+    bashio::log.error "  2. PAT is expired or invalid"
+    bashio::log.error "  3. Repository/Organization URL is incorrect"
+    bashio::log.error "  4. Network connectivity issues"
+    return 1
 }
 
 # If PAT is provided, use it to fetch a fresh registration token
@@ -199,37 +258,18 @@ if [ -n "$GITHUB_PAT" ]; then
     bashio::log.info "Successfully fetched fresh registration token using PAT"
 else
     bashio::log.info "Using provided registration token"
-fi
-
-# Validate repository URL format
-if [[ ! "$REPO_URL" =~ ^https://github\.com/[a-zA-Z0-9_-]+(/[a-zA-Z0-9_-]+)?$ ]]; then
-    bashio::log.warning "Repository URL format may be incorrect. Expected format:"
-    bashio::log.warning "  - For repository: https://github.com/owner/repo"
-    bashio::log.warning "  - For organization: https://github.com/organization"
-    bashio::log.warning "Provided URL: ${REPO_URL}"
-fi
-
-# Calculate token length for validation and debug logging
-# Initialize with default to ensure it's always set
-TOKEN_LENGTH=0
-TOKEN_LENGTH=${#RUNNER_TOKEN}
-
-# Validate token is not empty and has reasonable length (skip for PAT since it fetches new tokens)
-if [ -z "$GITHUB_PAT" ]; then
-    if [ "${TOKEN_LENGTH:-0}" -lt 20 ]; then
-        bashio::log.warning "Runner token appears to be too short (length: ${TOKEN_LENGTH:-0})"
-        bashio::log.warning "Please ensure you're using a valid registration token from GitHub"
-    fi
-    
     bashio::log.info "Note: Registration tokens expire after 1 hour. If you see 404 errors,"
     bashio::log.info "generate a new token from: GitHub → Settings → Actions → Runners → New runner"
     bashio::log.info "Or use a Personal Access Token (github_pat) for automatic token renewal"
 fi
 
+# Calculate token length for debug logging
+TOKEN_LENGTH=${#RUNNER_TOKEN}
+
 # Debug information
 if [ "$DEBUG_LOGGING" = "true" ]; then
     bashio::log.info "=== Debug Information ==="
-    bashio::log.info "OS Version: $(cat /etc/os-release | grep PRETTY_NAME | cut -d'=' -f2 | tr -d '\"')"
+    bashio::log.info "OS Version: $(grep PRETTY_NAME /etc/os-release | cut -d'=' -f2 | tr -d '\"')"
     bashio::log.info "Installed packages:"
     dpkg -l | grep -E "(libicu|libkrb5|liblttng|libssl|zlib)" || true
     bashio::log.info "Runner directory contents:"

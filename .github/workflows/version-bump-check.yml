@@ -48,13 +48,13 @@ jobs:
           if [ "$PR_VERSION" = "$MAIN_VERSION" ]; then
             echo "❌ ERROR: Version has not been bumped!"
             echo ""
-            echo "The version in ha-github-runner/config.yaml must be greater than the \
-          current main branch version."
+            echo "The version in ha-github-runner/config.yaml must be"
+            echo "greater than the current main branch version."
             echo "Current main version: $MAIN_VERSION"
             echo "Your PR version:      $PR_VERSION"
             echo ""
-            echo "Please update the version in ha-github-runner/config.yaml following \
-          semantic versioning:"
+            echo "Please update the version in ha-github-runner/config.yaml"
+            echo "following semantic versioning:"
             echo "  - MAJOR.MINOR.PATCH (e.g., 1.0.6)"
             echo "  - PATCH: Bug fixes and small changes"
             echo "  - MINOR: New features (backward-compatible)"
@@ -88,14 +88,14 @@ jobs:
           fi
 
           if [ "$VERSION_INCREASED" = false ]; then
-            echo "❌ ERROR: Version must be greater than the main \
-          branch version!"
+            echo "❌ ERROR: Version must be greater than the main"
+            echo "branch version!"
             echo ""
             echo "Current main version: $MAIN_VERSION"
             echo "Your PR version:      $PR_VERSION"
             echo ""
-            echo "The version in your PR must be numerically greater \
-          than the main branch version."
+            echo "The version in your PR must be numerically greater"
+            echo "than the main branch version."
             exit 1
           fi
 

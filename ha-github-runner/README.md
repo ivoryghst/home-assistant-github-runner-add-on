@@ -170,6 +170,31 @@ The `/addon_configs` directory is available for storing persistent configuration
 - If you see errors like `rsync: [generator] chgrp ... failed: Operation not permitted (1)`, add the `--no-g` flag
 - You can still use `--checksum` and `--delete` flags as needed for your use case
 
+## Performance Tuning
+
+### Optimizing Runner Performance
+
+**Resource Allocation**
+- The runner inherits resource limits from Home Assistant
+- Monitor CPU and memory usage during workflow execution
+- Consider running resource-intensive workflows during off-peak hours
+
+**Workflow Best Practices**
+- Use caching for dependencies (actions/cache)
+- Minimize data transfer to/from /addon_configs
+- Use `--checksum` flag with rsync only when necessary (it's slower)
+- Clean up old artifacts and temporary files regularly
+
+**Network Optimization**
+- The addon includes automatic retry logic with exponential backoff
+- Connection timeouts are set to 10 seconds, max-time to 30 seconds
+- For slow networks, workflows may need longer timeout values
+
+**Debug Logging**
+- Enable `debug_logging: true` only when troubleshooting
+- Debug mode impacts performance due to verbose output
+- Remember to disable it after resolving issues
+
 ## Support
 
 Got questions or issues? Please open an issue on the [GitHub repository][github].
